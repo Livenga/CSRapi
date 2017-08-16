@@ -19,13 +19,13 @@ namespace CSRAPI
     //
     // デバイスの初期化・後処理
     //
-    [DllImport("rapi.dll")]
+    [DllImport("rapi.dll",SetLastError=true)]
       public static extern void CeRapiInitEx(ref RAPIINIT pRapiInit);
-    [DllImport("rapi.dll")]
+    [DllImport("rapi.dll",SetLastError=true)]
       public static extern int CeRapiUninit();
 
     // デバイスの OS 情報取得
-    [DllImport("rapi.dll")]
+    [DllImport("rapi.dll",SetLastError=true)]
       public static extern int CeGetVersionEx(ref CEOSVERSIONINFO ceosver);
 
     //
@@ -41,7 +41,7 @@ namespace CSRAPI
     // ファイル操作
     //
     // Open / Close
-    [DllImport("rapi.dll",CharSet=CharSet.Unicode)]
+    [DllImport("rapi.dll",CharSet=CharSet.Unicode,SetLastError=true)]
       public static extern int CeCreateFile(
           string lpFileName,
           uint   dwDesiredAccess,
@@ -50,18 +50,18 @@ namespace CSRAPI
           int    dwCreationDisposition,
           int    dwFlagsAndAttributes,
           int    hTemplateFile);
-    [DllImport("rapi.dll")]
+    [DllImport("rapi.dll",SetLastError=true)]
       public static extern bool CeCloseHandle(int hObject);
 
     // Read / Write
-    [DllImport("rapi.dll",CharSet=CharSet.Unicode)]
+    [DllImport("rapi.dll",CharSet=CharSet.Unicode,SetLastError=true)]
       public static extern bool CeReadFile(
           int     hFile,
           byte[]  lpBuffer,
           int     nNumberOfBytesToRead,
           out int lpNumberOfBytesRead,
           int     lpOverlapped);
-    [DllImport("rapi.dll",CharSet=CharSet.Unicode)]
+    [DllImport("rapi.dll",CharSet=CharSet.Unicode,SetLastError=true)]
       public static extern int CeWriteFile(
           int     hFile,
           byte[]  lpBuffer,
@@ -70,7 +70,7 @@ namespace CSRAPI
           int     lpOverlapped);
 
     // ファイルサイズの取得
-    [DllImport("rapi.dll")]
+    [DllImport("rapi.dll",SetLastError=true)]
       public static extern uint CeGetFileSize(IntPtr hFile, ref uint lpFileSizeHigh);
   }
 #endregion
