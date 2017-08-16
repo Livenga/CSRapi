@@ -1,7 +1,7 @@
 CSC  = csc
 
 SRC  = $(subst /,\,$(shell gfind src -name \*.cs))
-PRJC = CSRAPI
+PRJC = CSRapi
 
 default:
-	$(CSC) /target:library /out:$(PRJC).dll $(SRC)
+	$(CSC) /target:library /out:$(PRJC).dll /define:_DEBUG_ $(SRC)
