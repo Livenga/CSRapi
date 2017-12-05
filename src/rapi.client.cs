@@ -123,7 +123,7 @@ namespace CSRAPI
       using(FileStream strm = new FileStream(destFileName, FileMode.Create)) {
         // Windows CE からファイルの読み込み
         handle    = RAPI.CeCreateFile(
-            destFileName,
+            sourceFileName,
             (uint)DesiredAccess.GENERIC_READ,
             (int)ShareMode.FILE_SHARE_READ,
             0,
@@ -134,7 +134,7 @@ namespace CSRAPI
         // ファイルが存在しない場合, 例外を投げる.
         if(handle < 0)
           throw new FileNotFoundException(
-              "Windows CEデバイス内に " + destFileName + " は存在しません.");
+              "Windows CEデバイス内に " + sourceFileName + " は存在しません.");
 
         file_size = RAPI.CeGetFileSize((IntPtr)handle, ref ref_value);
         ctx       = new byte[file_size];
