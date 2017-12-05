@@ -147,6 +147,7 @@ namespace CSRAPI
 
         // ƒtƒ@ƒCƒ‹‚Ì‘‚«‚İ
         strm.Write(ctx, 0, n);
+        strm.flush(true);
       }
     }
 #endregion
