@@ -53,8 +53,9 @@ namespace CSRAPI
     /// <param name="sourceFileName">ローカルの対象ファイルパス</param>
     /// <param name="destFileName">Windows CE に保存するパス</param>
 #region public void Create(string, string)
-    public void Create(string sourceFileName, string destFileName)
-    {
+    public void Create(
+        string sourceFileName,
+        string destFileName) {
       int handle;
       byte[] ctx = null;
 
@@ -106,8 +107,9 @@ namespace CSRAPI
     /// <param name="sourceFileName">Windows CE の対象ファイルパス</param>
     /// <param name="destFileName">ローカルに保存するパス</param>
 #region public void Copy(string, string)
-    public void Copy(string sourceFileName, string destFileName)
-    {
+    public void Copy(
+        string sourceFileName,
+        string destFileName) {
       int    handle;
       uint   file_size, ref_value = 0;
       

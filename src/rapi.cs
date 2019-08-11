@@ -2,12 +2,10 @@ using System;
 using System.Runtime.InteropServices;
 
 
-namespace CSRAPI
-{
+namespace CSRAPI {
   /// <summary>Remote API Class</summary>
 #region public class RAPI
-  public class RAPI
-  {
+  public class RAPI {
     //
     // デバイス接続操作
     //
@@ -50,6 +48,7 @@ namespace CSRAPI
           int    dwCreationDisposition,
           int    dwFlagsAndAttributes,
           int    hTemplateFile);
+
     [DllImport("rapi.dll",SetLastError=true)]
       public static extern bool CeCloseHandle(int hObject);
 
@@ -72,13 +71,18 @@ namespace CSRAPI
     // ファイルサイズの取得
     [DllImport("rapi.dll",SetLastError=true)]
       public static extern uint CeGetFileSize(IntPtr hFile, ref uint lpFileSizeHigh);
+
+    // ファイルの移動
+    [DllImport("rapi.dll", Charset = Charset.Unicode, SetLastError = true)]
+      public static extern int CeMoveFile(
+          string sExistingFileName,
+          string sNewFileName);
   }
 #endregion
   
   /// <summary>Windows CE 接続時の例外</summary>
 #region public class CEConnectionException
-  public class CEConnectionException : Exception
-  {
+  public class CEConnectionException : Exception {
     public CEConnectionException() : base() {}
     public CEConnectionException(string message) : base (message) {}
     public CEConnectionException(string message, Exception inner) : base(message, inner) {}
