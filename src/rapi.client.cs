@@ -2,11 +2,17 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace CSRAPI
-{
+namespace CSRAPI {
   public class RAPIClient {
     /// <summary>接続状態の確認</summary>
-    public bool IsConnected { get { return this.isConnected; } }
+    public bool IsConnected {
+      private set {
+        this.isConnected = value;
+      }
+      get {
+        return this.isConnected;
+      }
+    }
 
 
     private uint timeout     = 2000;
@@ -14,13 +20,16 @@ namespace CSRAPI
 
 
     /// <summary>コンストラクタ</summary>
-    public RAPIClient() : this(2000) {}
-    public RAPIClient(uint timeout) { this.timeout = timeout; }
+    public RAPIClient() : this(2000) {
+    }
+
+    public RAPIClient(uint timeout) {
+      this.timeout = timeout;
+    }
 
     /// <summary>接続</summary>
 #region public void Connect()
-    public void Connect()
-    {
+    public void Connect() {
       uint     wait_result = 0;
       RAPIINIT rinit;
 
@@ -30,10 +39,10 @@ namespace CSRAPI
       RAPI.CeRapiInitEx(ref rinit);
       wait_result  = RAPI.WaitForSingleObjectEx((int)rinit.heRapiInit, this.timeout);
       if(rinit.hrRapiInit == 0) { // 接続成功
-        this.isConnected = true;
+        this.IsConnected = true;
       }
       else { // 接続失敗
-        this.isConnected = false;
+        this.IsConnected = false;
         throw new CEConnectionException("Windows CE への接続に失敗", new Exception());
       }
     }
@@ -41,9 +50,11 @@ namespace CSRAPI
 
     /// <summary>切断</summary>
 #region public  void Disconnect()
-    public void Disconnect()
-    {
-      if(!this.isConnected) return;
+    public void Disconnect() {
+      if(this.IsConnected == false) {
+        return;
+      }
+
       RAPI.CeRapiUninit();
     }
 #endregion
@@ -56,10 +67,10 @@ namespace CSRAPI
     public void Create(
         string sourceFileName,
         string destFileName) {
-      int handle;
+      int    handle;
       byte[] ctx = null;
 
-      if(!this.isConnected) {
+      if(this.IsConnected == false) {
         Exception e = new Exception();
         throw new CEConnectionException("Windows CE が接続されていません.", e);
       }
@@ -111,7 +122,8 @@ namespace CSRAPI
         string sourceFileName,
         string destFileName) {
       int    handle;
-      uint   file_size, ref_value = 0;
+      uint   file_size,
+             ref_value = 0;
       
       int    n;
       byte[] ctx = null;
@@ -149,8 +161,17 @@ namespace CSRAPI
 
         // ファイルの書き込み
         strm.Write(ctx, 0, n);
-        strm.Flush(true);
+        strm.Flush();
+        //strm.Flush(true);
       }
+    }
+#endregion
+
+    /// <summary>Windows CE 内おファイルを削除</summary>
+    /// <param name="filePath"></param>
+#region public bool DeleteFile(string)
+    public bool DeleteFile(string filePath) {
+      return RAPI.CeDeleteFile(filePath);
     }
 #endregion
   }
