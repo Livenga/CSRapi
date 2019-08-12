@@ -67,7 +67,7 @@ namespace CSRAPI {
     public void Create(
         string sourceFileName,
         string destFileName) {
-      int    handle;
+      IntPtr handle;
       byte[] ctx = null;
 
       if(this.IsConnected == false) {
@@ -83,7 +83,7 @@ namespace CSRAPI {
           (int)FlagsAndAttributes.FILE_ATTRIBUTE_NORMAL,
           0);
 
-      if(handle == -1) {
+      if(handle.ToInt64() == -1) {
         // TODO: エラーコード別のメッセージの取得
         int err = RAPI.CeGetLastError();
 #if _DEBUG_
@@ -119,24 +119,37 @@ namespace CSRAPI {
     /// <param name="destFileName">ローカルに保存するパス</param>
 #region public void Copy(string, string)
     public void Copy(
-        string sourceFileName,
-        string destFileName) {
-      int    handle;
+            string sourceFileName,
+            string destFileName) {
+      int _val;
+      this.Copy(sourceFileName, destFileName, out _val);
+    }
+#endregion
+
+    //
+#region public void Copy(string, string, out int errorCode)
+    public void Copy(
+            string sourceFileName,
+            string destFileName,
+        out int    errorCode) {
+      IntPtr handle;
       uint   file_size,
              ref_value = 0;
       
       int    n;
       byte[] ctx = null;
 
+      errorCode = 0;
 
       if(!this.isConnected) {
-        Exception e = new Exception();
-        throw new CEConnectionException("Windows CE が接続されていません.", e);
+        throw new CEConnectionException(
+            "Windows CE が接続されていません.",
+            new Exception());
       }
 
       using(FileStream strm = new FileStream(destFileName, FileMode.Create)) {
         // Windows CE からファイルの読み込み
-        handle    = RAPI.CeCreateFile(
+        handle = RAPI.CeCreateFile(
             sourceFileName,
             (uint)DesiredAccess.GENERIC_READ,
             (int)ShareMode.FILE_SHARE_READ,
@@ -146,16 +159,25 @@ namespace CSRAPI {
             0);
 
         // ファイルが存在しない場合, 例外を投げる.
-        if(handle < 0)
+        if(handle.ToInt64() == -1) {
+          errorCode = RAPI.CeGetLastError();
+#if DEBUG
+          Console.Error.WriteLine(RAPI.CeGetLastError());
+#endif
           throw new FileNotFoundException(
               "Windows CEデバイス内に " + sourceFileName + " は存在しません.");
+        }
 
         file_size = RAPI.CeGetFileSize((IntPtr)handle, ref ref_value);
         ctx       = new byte[file_size];
+
         RAPI.CeReadFile(handle, ctx, (int)file_size, out n, 0);
+
+        errorCode = RAPI.CeGetLastError();
+
         RAPI.CeCloseHandle(handle);
 
-#if _DEBUG_
+#if DEBUG
         Console.WriteLine("### [D] {0} size {1} ###", destFileName, file_size);
 #endif
 
@@ -174,5 +196,77 @@ namespace CSRAPI {
       return RAPI.CeDeleteFile(filePath);
     }
 #endregion
+
+    public FileAttributes GetFileAttributes(string path) {
+      return RAPI.CeGetFileAttributes(path);
+    }
+
+
+    public bool ExistsDirectory(string path) {
+      IntPtr handle;
+      CeFindData data = new CeFindData();
+
+      handle = RAPI.CeFindFirstFile(path, ref data);
+      if(handle.ToInt64() != -1) {
+        return ((FileAttributes)data.dwFileAttributes & FileAttributes.Directory)
+          == FileAttributes.Directory;
+      }
+
+      return false;
+    }
+
+
+    public bool CreateDirectory(string path) {
+      int _val;
+      return this.CreateDirectory(path, out _val);
+    }
+
+    public bool CreateDirectory(string path, out int errorCode) {
+      errorCode = 0;
+
+      if(RAPI.CeCreateDirectory(path, IntPtr.Zero) == false) {
+        errorCode = RAPI.CeGetLastError();
+      }
+
+      return true;
+    }
+
+    public bool ExistsFile(string path) {
+      int _v;
+      return this.ExistsFile(path, out _v);
+    }
+
+    public bool ExistsFile(string path, out int errorCode) {
+      FileAttributes attr;
+
+      attr = RAPI.CeGetFileAttributes(path);
+
+      if((long)attr == -1) {
+        errorCode = RAPI.CeGetLastError();
+        return false;
+      }
+
+      if((attr & FileAttributes.Directory) == FileAttributes.Directory) {
+        errorCode = 0;
+        return false;
+      }
+
+      errorCode = 0;
+      return true;
+    }
+
+    public void Find(string target, bool isRecursive) {
+      IntPtr handle;
+      CeFindData ceFindData = new CeFindData();
+
+      handle = RAPI.CeFindFirstFile(target, ref ceFindData);
+
+      Console.Error.WriteLine("{0}", ceFindData.cFileName);
+      while(RAPI.CeFindNextFile(handle, ref ceFindData)) {
+        Console.Error.WriteLine("{0}", ceFindData.cFileName);
+      }
+
+      RAPI.CeFindClose(handle);
+    }
   }
 }

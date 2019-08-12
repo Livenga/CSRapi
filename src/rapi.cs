@@ -65,7 +65,7 @@ namespace CSRAPI {
 
     // Open / Close
     [DllImport("rapi.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    public static extern int CeCreateFile(
+    public static extern IntPtr CeCreateFile(
         string lpFileName,
         uint   dwDesiredAccess,
         int    dwShareMode,
@@ -75,12 +75,12 @@ namespace CSRAPI {
         int    hTemplateFile);
 
     [DllImport("rapi.dll",SetLastError=true)]
-    public static extern bool CeCloseHandle(int hObject);
+    public static extern bool CeCloseHandle(IntPtr hObject);
 
     // Read / Write
     [DllImport("rapi.dll",CharSet = CharSet.Unicode, SetLastError = true)]
     public static extern bool CeReadFile(
-            int    hFile,
+            IntPtr hFile,
             byte[] lpBuffer,
             int    nNumberOfBytesToRead,
         out int    lpNumberOfBytesRead,
@@ -88,7 +88,7 @@ namespace CSRAPI {
 
     [DllImport("rapi.dll",CharSet = CharSet.Unicode, SetLastError = true)]
     public static extern int CeWriteFile(
-            int    hFile,
+            IntPtr hFile,
             byte[] lpBuffer,
             int    nNumberOfBytesToWrite,
         out int    nNumberOfBytesWritten,
@@ -112,7 +112,7 @@ namespace CSRAPI {
 
     // ファイル特性の取得
     [DllImport("rapi.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    public static extern ulong CeGetFileAttributes(string lpFileName);
+    public static extern FileAttributes CeGetFileAttributes(string lpFileName);
 
     // ファイルの移動
     [DllImport("rapi.dll", CharSet = CharSet.Unicode, SetLastError = true)]
