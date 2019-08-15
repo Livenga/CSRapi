@@ -43,7 +43,7 @@ namespace CSRAPI {
       }
       else { // 接続失敗
         this.IsConnected = false;
-        throw new CEConnectionException("Windows CE への接続に失敗", new Exception());
+        throw new CeRapiException("Windows CE への接続に失敗.");
       }
     }
 #endregion
@@ -71,8 +71,7 @@ namespace CSRAPI {
       byte[] ctx = null;
 
       if(this.IsConnected == false) {
-        Exception e = new Exception();
-        throw new CEConnectionException("Windows CE が接続されていません.", e);
+        throw new CeRapiException("Windows CE が接続されていません.");
       }
 
       handle = RAPI.CeCreateFile(destFileName,
@@ -84,12 +83,7 @@ namespace CSRAPI {
           0);
 
       if(handle.ToInt64() == -1) {
-        // TODO: エラーコード別のメッセージの取得
-        int err = RAPI.CeGetLastError();
-#if _DEBUG_
-        Console.WriteLine("### [D] Error Code: {0} ###", err);
-#endif
-        throw new Exception("CeCreateFile: ファイル作成時にエラーが発生しました.");
+        throw new CeRapiException(RAPI.CeGetLastError());
       }
 
 
@@ -121,17 +115,6 @@ namespace CSRAPI {
     public void Copy(
             string sourceFileName,
             string destFileName) {
-      int _val;
-      this.Copy(sourceFileName, destFileName, out _val);
-    }
-#endregion
-
-    //
-#region public void Copy(string, string, out int errorCode)
-    public void Copy(
-            string sourceFileName,
-            string destFileName,
-        out int    errorCode) {
       IntPtr handle;
       uint   file_size,
              ref_value = 0;
@@ -139,12 +122,8 @@ namespace CSRAPI {
       int    n;
       byte[] ctx = null;
 
-      errorCode = 0;
-
       if(!this.isConnected) {
-        throw new CEConnectionException(
-            "Windows CE が接続されていません.",
-            new Exception());
+        throw new CeRapiException("Windows CE が接続されていません.");
       }
 
       using(FileStream strm = new FileStream(destFileName, FileMode.Create)) {
@@ -160,23 +139,15 @@ namespace CSRAPI {
 
         // ファイルが存在しない場合, 例外を投げる.
         if(handle.ToInt64() == -1) {
-          errorCode = RAPI.CeGetLastError();
-#if DEBUG
-          Console.Error.WriteLine(RAPI.CeGetLastError());
-#endif
-          throw new FileNotFoundException(
-              "Windows CEデバイス内に " + sourceFileName + " は存在しません.");
+          throw new CeRapiException(RAPI.CeGetLastError());
         }
+
 
         file_size = RAPI.CeGetFileSize((IntPtr)handle, ref ref_value);
         ctx       = new byte[file_size];
 
         RAPI.CeReadFile(handle, ctx, (int)file_size, out n, 0);
-
-        errorCode = RAPI.CeGetLastError();
-
         RAPI.CeCloseHandle(handle);
-
 #if DEBUG
         Console.WriteLine("### [D] {0} size {1} ###", destFileName, file_size);
 #endif
@@ -193,7 +164,14 @@ namespace CSRAPI {
     /// <param name="filePath"></param>
 #region public bool DeleteFile(string)
     public bool DeleteFile(string filePath) {
-      return RAPI.CeDeleteFile(filePath);
+      bool ret = RAPI.CeDeleteFile(filePath);
+      int  errCode = RAPI.CeGetLastError();
+
+      if(ret == false && errCode != 0) {
+        throw new CeRapiException(errCode);
+      }
+
+      return ret;
     }
 #endregion
 
@@ -217,41 +195,26 @@ namespace CSRAPI {
 
 
     public bool CreateDirectory(string path) {
-      int _val;
-      return this.CreateDirectory(path, out _val);
-    }
-
-    public bool CreateDirectory(string path, out int errorCode) {
-      errorCode = 0;
-
       if(RAPI.CeCreateDirectory(path, IntPtr.Zero) == false) {
-        errorCode = RAPI.CeGetLastError();
+        throw new CeRapiException(RAPI.CeGetLastError());
       }
-
       return true;
     }
 
-    public bool ExistsFile(string path) {
-      int _v;
-      return this.ExistsFile(path, out _v);
-    }
 
-    public bool ExistsFile(string path, out int errorCode) {
+    public bool ExistsFile(string path) {
       FileAttributes attr;
 
       attr = RAPI.CeGetFileAttributes(path);
 
       if((long)attr == -1) {
-        errorCode = RAPI.CeGetLastError();
-        return false;
+        throw new CeRapiException(RAPI.CeGetLastError());
       }
 
       if((attr & FileAttributes.Directory) == FileAttributes.Directory) {
-        errorCode = 0;
         return false;
       }
 
-      errorCode = 0;
       return true;
     }
 

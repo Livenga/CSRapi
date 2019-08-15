@@ -181,13 +181,4 @@ namespace CSRAPI {
         ref ProcessInformation lpProcessInformation);
   }
 #endregion
-  
-  /// <summary>Windows CE ê⁄ë±éûÇÃó·äO</summary>
-#region public class CEConnectionException
-  public class CEConnectionException : Exception {
-    public CEConnectionException() : base() {}
-    public CEConnectionException(string message) : base (message) {}
-    public CEConnectionException(string message, Exception inner) : base(message, inner) {}
-  }
-#endregion
 }
