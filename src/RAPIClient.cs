@@ -208,7 +208,8 @@ namespace CSRAPI {
       attr = RAPI.CeGetFileAttributes(path);
 
       if((long)attr == -1) {
-        throw new CeRapiException(RAPI.CeGetLastError());
+        return false;
+        //throw new CeRapiException(RAPI.CeGetLastError());
       }
 
       if((attr & FileAttributes.Directory) == FileAttributes.Directory) {
