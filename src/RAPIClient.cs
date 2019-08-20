@@ -43,6 +43,8 @@ namespace CSRAPI {
       }
       else { // ê⁄ë±é∏îs
         this.IsConnected = false;
+
+        RAPI.CeRapiUninit();
         throw new CeRapiException("Windows CE Ç÷ÇÃê⁄ë±Ç…é∏îs.");
       }
     }
