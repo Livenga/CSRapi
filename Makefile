@@ -8,4 +8,4 @@ default:
 	$(CSC) -target:library -out:$(PRJC).dll $(SRC)
 
 debug:
-	$(CSC) -target:library -out:$(PRJC).dll -define:_DEBUG_ $(SRC)
+	$(CSC) -target:library -out:$(PRJC).dll -define:_DEBUG_ -define:DEBUG $(SRC)
